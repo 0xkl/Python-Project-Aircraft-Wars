@@ -168,4 +168,4 @@ run_game()
 这个文件的背景色与这个项目使用的设置相同。请在主项目文件夹 **alien_invasion**中新建一个文件夹，将其命名为
 **images**，并将文件 **ship.bmp** 保存到这个文件夹中。
 
-![4-1 ship.bmp 图片](./images/ship.jpeg)
+![4-1 ship.bmp 图片](./images/ship.jpg)
