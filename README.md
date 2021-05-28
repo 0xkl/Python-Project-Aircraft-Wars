@@ -68,6 +68,7 @@ run_game()
 
 ### 3.2 设置背景色
 Pygame 默认创建一个黑色屏幕，这样子看着眼睛太难受了，我们为《飞机大战》游戏设置一个新的背景颜色。
+- alien_invasion.py
 ```python
 --snip--
 def run_game():
@@ -106,6 +107,7 @@ run_game()
 这让函数调用更简单，且在项目增大时修改游戏的外观更容易:要修改游戏，只需要修改 **settings.py** 中的一些值，而无需查找
 散布在文件中的不同位置。
 下面是最初的 Settings 类：
+- settings.py
 ```python
 class Setting() :
     """存储《飞机大战》所有设置的类"""
@@ -119,6 +121,7 @@ class Setting() :
 
 ```
 为创建 **Settings** 实列并使用它来访问设置，将 **alien_invasion.py** 修改成下面这样子：
+- alien_invasion.py
 ```python
 --snip--
 import pygame 
@@ -169,3 +172,81 @@ run_game()
 **images**，并将文件 **ship.bmp** 保存到这个文件夹中。
 
 ![4-1 ship.bmp 图片](./images/ship.jpg)
+
+
+### 4.1 创建Ship类
+选择用于表示飞船的图像后，需要将其显示到屏幕上。我们创建一个名为 **ship** 的模块，其中包含 **Ship** 类，它负责管理飞船的大部份行为。
+- ship.py
+```python
+import pygame
+
+class Ship():
+
+    def __init__(self, screen):
+        """初始化飞船并设置其初始化位置"""
+        self.screen = screen
+
+        # 加载飞船图像并获取其外接矩形
+        self.image = pygame.image.load('image/ship.bmp')
+        self.rect = self.image.rect()
+        self.screen_rect = screen.get_rect()
+
+        # 将没艘新飞船放在屏幕底部中央
+        self.rect.centerx = self.screen_rect.centerx
+        self.rect.bottom = self.screen_rect.bottom
+
+    def blitme(self):
+        """在指定位置绘制飞船"""
+        self.screen.blit(self.image, self.rect)
+```
+首先，我们导入 **pygame** 模块。Ship 的方法 **__init__()** 接受两个参数：引用 **self** 和 **screen** ，其中后者指定了要将飞船绘制到什么地方。
+为加载图像，我们调用了 **pygame.image.load()** 。这个函数返回一个辩是飞船的 **surface** ，而我们将这个 **surface** 存储到了 **self.image** 中。
+
+加载图像后，我们使用 **get_rect()** 获取相应 **surface** 的属性 **rect** 。 **Pygame** 的效率之所以会如此之高，一个原因是让它能够处理矩形
+（rect对象）一样处理游戏元素，即使他们的形状并非矩形。像处理矩形一样处理游戏元素之所以高效，是因为矩形是简单的几何形状。这种
+做法的效果通常很好，游戏玩家几乎注意不到我们处理的不是游戏元素的实际形状。
+
+处理 **rect** 对象是，可使用矩形四角和中心 *x* 和 *y* 坐标。可通过设置这些值来指定矩形的位置。
+
+要将游戏元素剧中，可设置相应 **rect** 对象的属性 **center、centerx、centery** 。 要让游戏元素与屏幕边缘对齐，可使用属性
+top、bottom、left或right；要调整游戏元素和水平或垂直位置，可使用属性 *x* 和 *y* ，它们分别是相应矩形左上角的 *x* 和 *y*坐标。
+这些属性让你无需要去做游戏开发人员原本需要手工完成的计算，你经常会用到这些属性。
+
+    - 注意：
+    - 在Pygame中，原点(0, 0)位于屏幕左上角，向右下方移动时，坐标值将增大。
+    - 在1200×800的屏幕上，原点位于左上角，而右下角的坐标为(1200, 800)。
+
+我们将把飞船放在屏幕底部中央。 所以，首先将表示屏幕的矩形存储在 **self.screen_rect** 中，将 **self.rect_centerx** （飞船中心的 *x* 坐标）
+设置为表示屏幕的矩形的属性 **centerx** ，并将 **self.rect.bottom** （飞船下边缘的 *y* 坐标）设置为表示屏幕的矩形的属性 **bottom** 。
+**Pygame** 将使用 **rect** 属性来放置飞船图像，使其与屏幕下边缘对齐并水平居中。
+
+我们定义了方法 **blitme()** ，它根据 **self.rect** 指定的位置将图像绘制到屏幕上。
+
+### 4.2 在屏幕上绘制飞船
+- alien_invasion.py
+```python
+--snip--
+def run_game():
+    # 初始化pygame、设置和屏幕对象
+    --snip--
+    pygame.display.set_caption('飞机大战')
+
+    # 创建一艘飞船
+    ship = Ship(screen)
+
+    # 开始游戏主循环
+    while True:
+
+        # 监听键盘和鼠标事件
+        --snip--
+
+        # 每次循环时都会重绘屏幕
+        screen.fill(bg_color)
+        ship.blitme()
+        # 让最近绘制的屏幕可见
+        pygame.display.flip()
+
+run_game()
+```
+我们导入 **Ship** 类，并在创建屏幕后创建一个名为 **ship** 的 **Ship** 实列。必须在主 **while** 循环前面创建 **ship** 飞船，以免每次循环时都会
+创建一艘飞船。填充背景后，我们调用 **ship.blitme()** 将飞船绘制到屏幕上，确保出现在背景前面。
