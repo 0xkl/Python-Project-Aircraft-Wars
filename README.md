@@ -1,5 +1,6 @@
 # 武装飞船
 ## 1.0 规划项目
+
 ## 2.0 安装Pygame
 ### 2.1 使用pip安装Pygame包
 1. 在Linux和OS X系统中检查是否安装了pip
@@ -11,6 +12,7 @@
 ### 2.2 在Linux系统中安装Pygame
 ### 2.3 在OS X系统中安装Pygame
 ### 2.4 在Windows系统中安装Pygame
+
 ## 3.0 开始游戏项目
 ### 3.1 创建Pygame窗口以及响应用户的输出
 首先，创建一个空的Pygame窗口。使用Pygame编写游戏的基本结构，如下：
@@ -63,3 +65,90 @@ run_game()
 擦去旧屏幕，使得只有新屏幕可见。在我们移动游戏结构中，最后一行调用 **run_game()** ，这将初始化游戏并开始主循环。
 
 编写完 **alien_invasion.py** 并且执行之后你将看到一个空的 **Pygame** 窗口。
+
+### 3.2 设置背景色
+Pygame 默认创建一个黑色屏幕，这样子看着眼睛太难受了，我们为《飞机大战》游戏设置一个新的背景颜色。
+```python
+--snip--
+def run_game():
+    # 初始化pygame、设置和屏幕对象
+    --snip--
+    pygame.display.set_caption('飞机大战')
+
+    # 设置背景色
+    bg_color = (230, 230, 230)
+
+    # 开始游戏主循环
+    while True:
+
+        # 监听键盘和鼠标事件
+        --snip--
+
+        # 每次循环时都会重绘屏幕
+        screen.fill(bg_color)
+
+        # 让最近绘制的屏幕可见
+        pygame.display.flip()
+
+run_game()
+```
+首先，我们创建了以种背景颜色，并将其存储在 **bg_color** 中，该颜色只需指定一次，因此我们在进入主 **while** 循环钱定义它。
+
+在 **Pygame** 中，颜色始以 **RGB** 值指定的。这种颜色由红色、绿色和蓝色值组成，其中每个值的取值范围是 **0~255** 。颜色值 **(255,0,0)**
+表示红色，**(0,255,0)** 表示绿色，而 **(0,0,255)** 表示蓝色。通过组合不同的 **RGB** 值，可创建1600万种颜色，在颜色值 **(230,230,230)** 中，
+红色、蓝色和绿色量相同，它将背景设置为一种浅灰色。
+
+在 **while** 循环中，我们调用 **screen.fill()** ，用背景色填充屏幕：这个方法只接受一个实参，以种颜色。
+
+### 创建设置类
+每次给游戏添加新功能时，通常也将引入一些新设置。下面来编写一个名为 **settings** 的模块，其中包含一个为 **Settings** 的类，
+用于将所有设置存储在一个地方，以免在代码中到处添加设置。这样，我们就能传递一个设置对象，而不是众多不同的设置。另外，
+这让函数调用更简单，且在项目增大时修改游戏的外观更容易:要修改游戏，只需要修改 **settings.py** 中的一些值，而无需查找
+散布在文件中的不同位置。
+下面是最初的 Settings 类：
+```python
+class Setting() :
+    """存储《飞机大战》所有设置的类"""
+
+    def __init__(self):
+        """初始化游戏的设置"""
+        # 屏幕设置
+        self.screen_width = 1200
+        self.screen_height = 800
+        self.bg_color = (230,230,230)
+
+```
+为创建 **Settings** 实列并使用它来访问设置，将 **alien_invasion.py** 修改成下面这样子：
+```python
+--snip--
+import pygame 
+
+from settings import Settings
+def run_game():
+    # 初始化pygame、设置和屏幕对象
+    pygame.init()
+    ai_settings = Settings()
+    screen = pygame.display.set_mode((ai_settings.screen_width, ai_settings.screen_height))
+    pygame.display.set_caption('飞机大战')
+
+    # 设置背景色
+    bg_color = (230, 230, 230)
+
+    # 开始游戏主循环
+    while True:
+
+        # 监听键盘和鼠标事件
+        --snip--
+
+        # 每次循环时都会重绘屏幕
+        screen.fill(ai_settings.bg_color)
+
+        # 让最近绘制的屏幕可见
+        pygame.display.flip()
+
+run_game()
+
+```
+在主程序文件中，我们导入 **Settings** 类，调用 **pygame_init()** ，在创建一个 **Settings** 类，并将其存储在变量 **ai_settings** 中。
+创建屏幕时，使用了 **ai_screen_width** 和 **ai_screen_height** ;接下来填充屏幕时，也使用了 **ai_settings** 来访问背景色。
+
