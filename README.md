@@ -1,17 +1,109 @@
 # 武装飞船
 ## 1.0 规划项目
-
+在开始编写代码之前，我们要安装Pygame库。话不多说，我们来介绍一下如何在Linux、Mac_OS、Windows中安装Pygame。
 ## 2.0 安装Pygame
 ### 2.1 使用pip安装Pygame包
+2021年了现在大多数比较新的Python版本都会自带pip，因此我们可以先简单来检查一下我们的系统是否安装了pip。在Python3中，pip有时候经常被称为pip3。
 1. 在Linux和OS X系统中检查是否安装了pip
+
+打开一个命令行窗口，执行一下命令：
+```bash
+$ pip --version
+pip 20.3.4 from /usr/lib/python3/dist-packages/pip (python 3.8)
+$
+```
+输入命令且到你按下回车键的那一刻，出现此消息证明你的电脑安装了Python Pip。如果出现类似的输出，则证明你安装了pip。如果没有或者有错误的消息接下来我们将研究如何安装。
+
 2. 在Windows系统中检查是否安装了pip
+```bash
+C:/> python -m pip --version
+pip 21.0.1 from C:\Users\ASUS\AppData\Local\Programs\Python\Python37\lib\site-packages\pip (python 3.7)
+C:/> 
+```
+输入命令且到你按下回车键的那一刻，出现此消息证明你的电脑安装了Python Pip。
+如果出现类似的输出，则证明你安装了pip。如果没有或者有错误的消息接下来我们将研究如何安装。
+
 3. 安装pip
+```bash
+$ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+```
+首先先下载pip安装脚本，不同的系统都适用这条命令。
+
 4. 在Linux和OS X系统中安装pip
+以管理员的身份运行这条命令。
+```bash
+$ sudo python get-pip.py
+```
+> 注意：如果你启动终端会话使用的命令时python3，那么在这里应该使用
+> sudo python3 get-pip.py 进行安装。
+
 5. 在Windows系统中安装pip
 
+使用下面命令运行get-pip.py
+```bash
+C:/> python get-pip.py
+```
+> 注意：如果你启动终端会话使用的命令时python3，那么在这里应该使用
+> sudo python3 get-pip.py 进行安装。
+
 ### 2.2 在Linux系统中安装Pygame
+如果你使用的时python2.7，请使用包管理器来安装Pygame。打开一个命令行窗口，并执行下面的命令：
+```bash
+$ sudo apt-get install python-pygame
+```
+执行如下这些命令，会在终端检查安装状态：
+```bash
+$ python
+Python 3.8.6 (default, XXX XX XXXX, XX:XX:XX) 
+[GCC 10.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pygame
+>>>
+```
+如果没有任何输出，就说明pygame导入了python中。
+如果你是python3，就需要执行两个步骤：安装pygame以来的库；下载并安装pygame。
+执行下面的命令来安装pygame以来的库。
+```bash
+$ sudo apt-get install python3-dev mercurial
+$ sudo apt-get install libsdl-image1.2-dev libsdl2-dev libsdl-ttf2.0-dev
+$ sudo apt-get install libsdl-mixer1.2-dev libportmidi-dev
+$ sudo apt-get install libswscale-dev libsmpeg-dev libavcode-dev
+$ sudo apt-get install python-numpy
+```
+接下来，执行下面的命令来安装pygame：
+```bash
+$ pip install --user hg+http://bitbucket.org/pygame/pygame
+```
 ### 2.3 在OS X系统中安装Pygame
+要安装pygame依赖的包，需要Homebrew。Homebrew安装如下：
+```bash
+$ xcode-select --install
+$ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+$
+```
+安装pygame依赖的库，输入以下命令：
+```bash
+$ brew install hg sdl sdl_image sdl_ttf
+$ brew install sdl_mixer portmidi
+```
+使用下面命令来安装pygame
+```bash
+$ pip install --user hg+http://bitbucket.org/pygame/pygame
+```
+启动一个python终端会话，并导入pygame检擦是否安装成功：
+```bash
+$ python
+Python 3.8.6 (default, XXX XX XXXX, XX:XX:XX) 
+[GCC 10.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pygame
+>>>
+```
 ### 2.4 在Windows系统中安装Pygame
+启动cmd命令行窗口，输入一下命令：
+```bash
+C:/> pip install pygame
+```
 
 ## 3.0 开始游戏项目
 ### 3.1 创建Pygame窗口以及响应用户的输出
