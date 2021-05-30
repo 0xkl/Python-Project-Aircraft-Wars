@@ -734,3 +734,24 @@ def check_events(ship):
 我们创建了两个新函数： **check_keydown_events()** 和 **check_keyup_events()** ，它们都包含形参 **event** 和 **ship** 。这两个函数的代码都是从 **check_events()** 中复制
 而来的，因此我们将函数 **check_events** 中相应的代码替换成了对这两个函数的调用。现在，函数 **check_events()** 更简单，代码结构更清晰。这样，在其中响应其他玩家
 输入时将更容易。
+
+## 7.0 简单回顾
+接下来我们将添加射击功能，这需要新增一个名为bullet.py的文件，并对一些已有的文件进行修改。当前，我们有四个文件其中包含了很多类、函数和方法。添加其他功能之前，为让你
+轻蹙这个醒目的组织结构，先来回顾一下这些文件。
+
+### 7.1 alien_invasion.py
+游戏主文件 *alien_invasion.py* 创建了一系列整个游戏都要用到的对象：存储在 **ai_settings** 中的设置、存储 **screen** 中的主显示 **surface** 以及一个飞船实例。
+文件 *alien_invasion.py* 还包含游戏的主循环，这是一个调用 **check_events()** 、 **ship.update()** 和 **update_screen()** 的 **while**循环。
+要玩《飞机大战》，只需要运行文件 **alien_invasion.py** 。其他的文件(setting.py、game_functions.py和ship.py）包含的代码被直接或间接地导入到这个文件中。
+
+### 7.1 setting.py
+文件 **setting.py** 包含了 **Setting** 类这个类只包含方法__init__()，它初始化控制游戏外观和飞船速度地属性。
+
+### 7.2 game_functions.py
+文件 **game_functions.py** 包含一系列函数，游戏地大部分工作都是由它们完成的。函数 **check_events()** 检测相关的事件，如按键和松开并使用辅助函数
+ **check_keydown_events()** 和 **check_keyup_events()** 来处理这些事件。就目前而言，这些函数管理飞船的移动。模块 **game_functions** 还包含函数
+ **update_screen()** ，它用于在每次执行主循环时都会重绘屏幕。
+
+### 7.3 ship.py
+文件 **ship.py** 包含 **Ship** 类，这个类包含方法__init__()、管理飞船位置的方法 **update()** 以及在屏幕上绘制飞船的图像存储在文件夹 **images** 下的
+文件 *ship.bmp* 中。
