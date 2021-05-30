@@ -141,13 +141,12 @@ run_game()
 **(1200, 800)** 是一个元组，制定了游戏窗口的尺寸，通过将这些尺寸传递给 **pygame.display.set_mode()** ，我们创建了一个
 宽1200像素、高200像素的游戏窗口（你可以根据自己的显示器尺寸调整这些值）。
 
-对象 **screen**是一个 **surface** 。在 **Pygame** 中，**surface** 是屏幕的一部分，用于显示游戏元素，在这个游戏中，每个元素（如敌军和
+对象 **screen**是一个 **surface** 。在 **Pygame** 中，**surface** 是屏幕的一部分，用于显示游戏元素，在这个游戏中，每个元素（如敌军
 或飞船）都是一个 **surface** 。 **display.set_mode()** 返回的 **surface** 表示整个游戏窗口。我们激活游戏的动画循环后，每经过一次
 循环将自动重新绘制这个 **surface**。
 
-这个游戏由一个 **while** 循环控制，其中包含一个事件循环以及管理屏幕更新的代码。事件是用户玩游戏时执行的操作，如按键或
-移动鼠标。为让程序向应事件。我们编写一个事件循环，以侦听事件，并根据发生的事件执行相应的任务，**while** 中的 **for** 循环
-就是一个事件循环。
+这个游戏由一个 **while** 循环控制，其中包含一个事件循环以及管理屏幕更新的代码。事件是用户玩游戏时执行的操作，如按键或移动鼠标。
+为让程序向应事件。我们编写一个事件循环，以侦听事件，并根据发生的事件执行相应的任务，**while** 中的 **for** 循环就是一个事件循环。
 
 为访问 **Pygame** 检测到的事件，我们使用方法 **pygame.event.get()** 。所有键盘和鼠标事件都将促使 **for** 循环运行。在这个循环中，
 我们编写一些列的 **if** 语句来检测并向应特定事件。例如：玩家单击游戏窗口的关闭按钮时，将检测到 **pygame.QUIT** 事件，而我们调用
@@ -196,9 +195,9 @@ run_game()
 ### 3.3 创建设置类
 每次给游戏添加新功能时，通常也将引入一些新设置。下面来编写一个名为 **settings** 的模块，其中包含一个为 **Settings** 的类，
 用于将所有设置存储在一个地方，以免在代码中到处添加设置。这样，我们就能传递一个设置对象，而不是众多不同的设置。另外，
-这让函数调用更简单，且在项目增大时修改游戏的外观更容易:要修改游戏，只需要修改 **settings.py** 中的一些值，而无需查找
-散布在文件中的不同位置。
+这让函数调用更简单，且在项目增大时修改游戏的外观更容易；要修改游戏，只需要修改 **settings.py** 中的一些值，而无需查找散布在文件中的不同位置。
 下面是最初的 Settings 类：
+
 - settings.py
 ```python
 class Setting() :
@@ -280,10 +279,10 @@ class Ship():
 
         # 加载飞船图像并获取其外接矩形
         self.image = pygame.image.load('image/ship.bmp')
-        self.rect = self.image.get.rect()
+        self.rect = self.image.get_ect()
         self.screen_rect = screen.get_rect()
 
-        # 将没艘新飞船放在屏幕底部中央
+        # 将每艘新飞船放在屏幕底部中央
         self.rect.centerx = self.screen_rect.centerx
         self.rect.bottom = self.screen_rect.bottom
 
@@ -342,3 +341,85 @@ run_game()
 ```
 我们导入 **Ship** 类，并在创建屏幕后创建一个名为 **ship** 的 **Ship** 实列。必须在主 **while** 循环前面创建 **ship** 飞船，以免每次循环时都会
 创建一艘飞船。填充背景后，我们调用 **ship.blitme()** 将飞船绘制到屏幕上，确保出现在背景前面。
+
+## 5.0 重构：game_functions模块
+在大型项目中，经常需要在添加新代码前重构以有的代码。重构旨在简化以有代码的结构，使其更容易扩展。所以我们将创建一个名为 **game_functions** 的新模块，它将
+存储大量让该项目运行的函数。通过创建模块 **game_functions** ，可避免 **alien_invasion.py** 太长太杂乱，并使其逻辑更容易理解。
+
+### 5.1 函数check_events()
+我们首先先把管理事件的代码移到一个名为 **check_events()** 函数中，以简化 **run_game()** 并隔离事件管理循环，可将事件管理与游戏的其他方面（如
+更新屏幕）进行分离。
+
+将 **check_events()** 放在一个名为 **game_functions** 的模块中：
+
+- game_functions.py
+```python
+import sys
+
+import pygame
+
+def check_events():
+    """响应按键和鼠标事件"""
+    for event in pygame.event.get() :
+        if event.type == pygame.QUIT :
+            sys.exit()
+```
+这个模块中导入了事件检查循环要使用的 **sys** 和 **pygame** 。当前，函数 **check_events()** 不需要任何形参，其函数体复制了 **alien_invasion.py**的事件循环。
+下面来修改 **alien_invasion.py** ，使其导入模块 **game_functions** ，并将事件循环替换为对函数 **check_events()** 的调用：
+
+- alien_invasion.py
+```python 
+import pygame
+
+from settings import Settings
+from ship import Ship
+import game_functuons as gf
+
+def run_game()：
+    --snip--
+    # 开始游戏主循环
+    while True:
+        gf.check_events()
+
+        # 让最近绘制的屏幕可见
+        --snip--
+```
+在主程序文件中，不再需要直接导入 **sys** ，因为当前只在模块 **game_functions** 中使用了它。出于简化的目的，我们给导入的模块 **game_functions** 指定了别名 **gf** 。
+
+### 5.2 函数update_screen()
+为了进一步简化 **run_game()** ，下面将更新屏幕的代码以到一个名为 **update_screen()** 的函数中，并将这个函数放在模块 **game_functions** 中：
+
+- game_functions.py
+```python
+--snip--
+
+def check_events() :
+    --snip--
+
+def update_screen(ai_settings, screen, ship) :
+    """更新屏幕上的图像，并切换到新屏幕"""
+    # 每次循环时都会重绘屏幕
+    screen.fill(ai_settings.bg_color)
+    ship.blitme()
+
+    # 让最近绘制的屏幕可见
+    pygame.display.flip()
+```
+新函数 **update_screen()** 包含了三个形参： **ai_settings** 、 **screen** 和 **ship** 。 现在需要将alien_invasion.py的whil循环中更新屏幕的代码替换为对函数update_screen()的调用：
+
+- alien_invasion.py
+```python
+--snip--
+    # 开始游戏主循环
+    while True :
+        gf.check_events()
+        gf.update_screen()
+
+run_game()
+```
+这两个函数让while循环更简单，并让后续开发更容易；在模块game_functions而不是 run_game()中完成大部分工作。
+
+鉴于我们一开始只想使用一个文件，因此没有立刻引入模块 game_functions。这让你能够了解实际的开发过程；一开始将代码编写得尽可能简单，并在项目越来越复杂时进
+行重构。
+
+对代码进行重构使其更容易扩展后，可以开始处理游戏的动态方面了。
