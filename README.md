@@ -745,13 +745,178 @@ def check_events(ship):
 要玩《飞机大战》，只需要运行文件 **alien_invasion.py** 。其他的文件(setting.py、game_functions.py和ship.py）包含的代码被直接或间接地导入到这个文件中。
 
 ### 7.1 setting.py
-文件 **setting.py** 包含了 **Setting** 类这个类只包含方法__init__()，它初始化控制游戏外观和飞船速度地属性。
+文件 *setting.py* 包含了 **Setting** 类这个类只包含方法__init__()，它初始化控制游戏外观和飞船速度地属性。
 
 ### 7.2 game_functions.py
-文件 **game_functions.py** 包含一系列函数，游戏地大部分工作都是由它们完成的。函数 **check_events()** 检测相关的事件，如按键和松开并使用辅助函数
+文件 *game_functions.py* 包含一系列函数，游戏地大部分工作都是由它们完成的。函数 **check_events()** 检测相关的事件，如按键和松开并使用辅助函数
  **check_keydown_events()** 和 **check_keyup_events()** 来处理这些事件。就目前而言，这些函数管理飞船的移动。模块 **game_functions** 还包含函数
  **update_screen()** ，它用于在每次执行主循环时都会重绘屏幕。
 
 ### 7.3 ship.py
-文件 **ship.py** 包含 **Ship** 类，这个类包含方法__init__()、管理飞船位置的方法 **update()** 以及在屏幕上绘制飞船的图像存储在文件夹 **images** 下的
+文件 *ship.py* 包含 **Ship** 类，这个类包含方法__init__()、管理飞船位置的方法 **update()** 以及在屏幕上绘制飞船的图像存储在文件夹 **images** 下的
 文件 *ship.bmp* 中。
+
+## 8.0 射击
+接下来添加设计功能。我们将编写玩家按空格键时发射子弹（小矩形）的代码。子弹将在屏幕中向上穿行。抵达屏幕上边缘后消失。
+
+### 8.1 添加子弹设置
+首先，更新setting.py，在其方法__inti__()末尾存储新类Bullet所需的值：
+
+
+- setting.py
+```python
+def __init__():
+    --snip--
+    # 子弹设置
+    self.bullet_speed_factor = 1
+    self.bullet_width = 3
+    self.bullet_height = 15
+    self.bullet_color = (60,60,60)
+```
+这些设置创建宽3像素、高15像素的深色子弹。子弹的速度比飞船稍低。
+
+### 8.2 船舰Bullet类
+下面来创建存储Bullet类的文件bullet.py，其前半部分如下：
+
+- bullet.py
+```python
+import pygame
+
+from pygame.sprite import Sprite
+
+class Bullet(Sprite) :
+    def __init__(self, ai_settings, screen, ship) :
+    """一个对飞船发射的位置船舰一个子弹对象"""
+        super(Bullet, self).__init__()
+        self.screen = screen
+
+        # 在(0, 0)处创建一个表示子弹的矩形，在设置正确的位置
+        self.rect = pygame.Rect(0, 0, ai_settings.bullet_width, ai_setting.bullet_height)    # <1>
+
+        self.rect.centerx = ship.rect.centerx    # <2>
+        self.rect.top = ship.rect.top    # <3>
+
+        # 存储用小数表示的子弹位置
+        self.y = float(self.rect.y)    # <4>
+        self.color = ai_settings.bullet_color    # <5>
+        self.speed_factor = ai_settings.bullet_speed_factor
+
+```
+Bullet类继承了我们从模块pygame.sprite中导入的Sprite类。通过使用精灵，可将游戏中相关的元素编组，进而同时操作编组中的所有元素。为创建子弹实例，需要
+向__init__()传递ai_settings、screen和ship实例，还调用super()来继承Sprite。
+
+    - 注意：
+    - 代码super(Bullte, self).\__init__()使用了Python2.7语法。这种语法也适用于Python3，但那你也可以将这行代码简写成super().\__init__()。
+
+在# <1>处，我们创建了子弹的属性rect。子弹并非基于图像的，因此我们必须使用pygame.Rect()类从空白开始创建了一个矩形。创建这个类的实例时，必须提供矩形左上角的
+*x* 坐标和 *y* 坐标，还有矩形的宽度和高度。我们在(0,0)处创建了这个矩形，但接下来的两行代码将其移到了正确的位置，因为子弹的初始位置取决于飞船当前的位置。子弹的宽度
+和高度是从 ai_setting 中获取的。
+
+在# <2>处，我们将子弹的centerx设置为飞船的rect.centerx。子弹应从飞船顶部射出，因此我们将表示子弹的rect的top属性设置为飞船的rect的top属性，让子弹看
+起来像是飞船中射出去的，见# <3>。
+
+我们将子弹的 *y* 坐标存储为小数值，以便能够微调子弹的速度（见# <4>）。在# <5>处，我们将子弹的颜色和速度设置分别存储到self.color和self.speed_factor中/
+下面是bullet.py的第二部分————方法update() 和draw_bullet()。
+
+- bullet.py
+```python
+def update(self):
+    """向上移动子弹"""
+    # 更新表示子弹位置的小数值
+    self.y -= self.speed_factor    # <1>
+
+    # 更新表示子弹的rect的位置
+    self.rect.y = self.y    # <2>
+
+def draw_bullet(self):
+    """在屏幕上绘制子弹"""
+    pygame.draw.rect(self.screen, self.color, self.rect)    # <3>
+```
+方法update()管理子弹的位置。发射出后，子弹在屏幕中向上移动，这意味着 *y* 坐标将不断减小。，因此更新子弹的位置，我们冲self.y 中减去 self.speed_factor
+的值（见# <1>）。接下来，我们将self.rect.y 设置为self.y的值（见# <2>）。属性speed_factor让我们能够随着游戏的进行或根据需要提高子弹的速度，已调整游戏的行
+为。子弹发射后，其 *x* 坐标始终不变，因此子弹将沿直线垂直地往上穿行。
+
+需要绘制子弹时，我们调用 draw_bullet()。函数 draw。rect()使用存储在self.color中额颜色填充表示 rect 占据地屏幕不凡（见# <3>）。
+
+### 8.3 将子弹存储到编组中
+定义Bullet类和必要的设置后，就可以编写代码了，在玩家每次按空格键时都射出依法子弹。首先，我们将在 alien_invasion.py中船舰一个编组（group），用于存储所有有效的子
+弹，以便能够管理发射出去的所有子弹。这个编组将是 pygame.sprite.Group 类的一个实例： pygame.sprite.Group 类类似于列表，但提供了有助于开发游戏的额外功
+能。在主循环中，我们将使用这个编组在屏幕上绘制子弹，以及更新每颗子弹的位置：
+
+- alien_invasion.py
+
+```python
+import pygame
+
+from pygame.sprite import Group
+--snip--
+
+def run_game():
+    --snip--
+    # 创建一艘飞船
+    ship = Ship(ai_settings, screen)
+    # 创建一个用于存储子弹的编组
+    bullets = Group    # <1>
+
+    # 开始游戏主循环
+    while True :
+        gf.check_events(ai_settings, screen, ship, bullets)
+        ship.update()
+        bullets.update()    # <2>
+        gf.update_screen(ai_settings, screen, ship, bullets)
+
+run_game()
+```
+我们导入了pygame.sprite中的Group类。在# <1>处，我们创建了一个Group实例，并将其命名为bullets。这个编组始在while循环外面创建的 ，这样就无需每次运行该
+循环时都创建一个新的子弹编组。
+    - 注意：
+    - 如果在循环内部船舰这样的编组，游戏运行时将创建数千个子弹编组，导致游戏慢得像乌龟。如果游戏停滞不前，请仔细查看主循环while循环中发生的情况。
+
+我们将bullets传递给了check_events()和update_screen()。在check_events()中，需要在玩家按空格键时处理bullets；而在update_screen()中，需要更新要绘制
+到屏幕上的bullets。
+
+当你对编组调用update()时，编组将自动对其中的每个精灵调用update()，因此代码bullets.update()将为编组bullets中的每颗子弹调用bullet.update()。
+
+### 8.4 开火
+在game_functions.py中，我们需要修改check_keydown_events()，以便在玩家按空格键时发射一颗子弹。我们无需修改check_keyup_events()，因为玩家松开空格键
+时什么都不会发生。我们还需修改update_screen()，确保在调用flip()前在屏幕上重绘每颗子弹。下面是对game_functions.py所作的相关修改：
+
+- game_functions.py
+```python
+--snip--
+from bullet import Bullet
+
+def check_keydown_events(event, ai_settings, screen, ship, bullets):    # <1>
+    """响应按键"""
+    --snip--
+    elif event.key == pygame.K_SPACE:    # <2>
+        new_bullet = Bullet(ai_settings, screen, ship)
+        bullets.add(new_bullet)
+        --snip--
+
+def check_events(ai_settings, screen, ship, bullets):    # <3>
+    """响应按键和鼠标事件"""
+    for event in pygame.event.get() :
+        --snip--
+        elif event.type == pygame.KEYDOWN :
+            check_keydown_events(event, ai_settings, screen, ship, bullets)
+        --snip--
+
+def update_screen(ai_settings, screen, ship, bullets) :    # <4>
+    """更新屏幕上的图像，并切换到新屏幕"""
+    --snip--
+    # 在飞船和外星人后面重绘所有子弹
+    for bullet in bullets.sprites():    # <5>
+        bullet.draw_bullet()
+
+    ship.blitme()
+    --snip--
+```
+编组bullters传递给了check_keydown_events()（见 # <1>）。玩家按空格键时，创建一颗新子弹（一个名为new_bullet的Bullet的实例），并用方法add()将其加入
+到编组bullets中（见 # <2>）：代码bullets.add(new_bullet)将新子弹存储到编组bullets中。
+
+在chenck_events()的定义中，我们需要添加形象bullets（见 # <3>）；调用check_keydown_events()时，我们也需要将bullets作为实参传递给它。
+
+在# <4>处，我们给在屏幕上绘制子弹的update_screen()添加了形参 bullets。方法bullets.sprites()返回一个列表，其中包含编组bullets中的所有子弹。为在屏幕
+上绘制发射的所有子弹，我们遍历编组bullets中的子弹，并对每个子弹都调用draw_bullet()（见 # <5>）。
+    
